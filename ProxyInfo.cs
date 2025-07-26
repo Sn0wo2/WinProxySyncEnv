@@ -16,11 +16,9 @@
         public override bool Equals(object obj)
         {
             if (obj is ProxyInfo other)
-            {
                 return ProxyEnable == other.ProxyEnable &&
                        ProxyServer == other.ProxyServer &&
                        ProxyOverride == other.ProxyOverride;
-            }
 
             return false;
         }
