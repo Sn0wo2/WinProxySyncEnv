@@ -49,6 +49,7 @@
     </ItemGroup>
     <ItemGroup>
         <Content Include=".github\dependabot.yml"/>
+        <Content Include=".github\FUNDING.yml"/>
     </ItemGroup>
     <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets"/>
 </Project>
