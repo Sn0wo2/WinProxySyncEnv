@@ -8,7 +8,7 @@ namespace WinProxyEnvSync
     internal static class Program
     {
         private const string AppName = "WinProxyEnvSync";
-        private static readonly string StartupKeyPath = @"Software\Microsoft\Windows\CurrentVersion\Run";
+        private const string StartupKeyPath = @"Software\Microsoft\Windows\CurrentVersion\Run";
         private static readonly string AppPath = Assembly.GetExecutingAssembly().Location;
 
         public static void Main(string[] args)
