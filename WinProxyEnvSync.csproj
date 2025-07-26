@@ -6,7 +6,7 @@
         <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
         <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
         <ProjectGuid>{1195D115-AE9F-4C0E-A6AD-17AFA3D1E44B}</ProjectGuid>
-        <OutputType>Exe</OutputType>
+        <OutputType>WinExe</OutputType>
         <AppDesignerFolder>Properties</AppDesignerFolder>
         <RootNamespace>WinProxyEnvSync</RootNamespace>
         <AssemblyName>WinProxyEnvSync</AssemblyName>
