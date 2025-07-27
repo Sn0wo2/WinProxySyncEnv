@@ -100,16 +100,16 @@ namespace WinProxyEnvSync
 
         private static void SetEnvironmentVariables(ProxyInfo info)
         {
-            var proxyServer = info.ProxyEnable ? info.ProxyServer : null;
+            var proxyServer = info.ProxyEnable ? $"http://{info.ProxyServer}" : null;
             var proxyOverride = info.ProxyEnable ? info.ProxyOverride : null;
 
             Environment.SetEnvironmentVariable("ALL_PROXY", proxyServer, EnvironmentVariableTarget.User);
             Environment.SetEnvironmentVariable("HTTP_PROXY", proxyServer, EnvironmentVariableTarget.User);
             Environment.SetEnvironmentVariable("HTTPS_PROXY", proxyServer, EnvironmentVariableTarget.User);
-            Environment.SetEnvironmentVariable("NO_PROXY", proxyOverride, EnvironmentVariableTarget.User);
             Environment.SetEnvironmentVariable("FTP_PROXY", proxyServer, EnvironmentVariableTarget.User);
-            Environment.SetEnvironmentVariable("PROXY_URL", proxyServer != null ? $"http://{proxyServer}" : null,
-                EnvironmentVariableTarget.User);
+            Environment.SetEnvironmentVariable("PROXY_URL", proxyServer, EnvironmentVariableTarget.User);
+
+            Environment.SetEnvironmentVariable("NO_PROXY", proxyOverride, EnvironmentVariableTarget.User);
             Environment.SetEnvironmentVariable("PROXY_NOC", proxyOverride, EnvironmentVariableTarget.User);
 
             SendMessageTimeout(HwndBroadcast, WmSettingchange, UIntPtr.Zero, "Environment",
