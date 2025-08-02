@@ -1,7 +1,7 @@
 using System;
 using WinProxyEnvSync.utils;
 
-namespace WinProxyEnvSync;
+namespace WinProxyEnvSync.proxy;
 
 public class ProxyInfo(bool proxyEnable, string proxyServer, string proxyOverride)
 {

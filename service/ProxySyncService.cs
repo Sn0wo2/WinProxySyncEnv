@@ -4,6 +4,7 @@ using System.Text;
 using System.Threading;
 using System.Timers;
 using System.Windows.Forms;
+using WinProxyEnvSync.proxy;
 using WinProxyEnvSync.utils;
 using Timer = System.Timers.Timer;
 
@@ -52,19 +53,18 @@ public class ProxySyncService : IDisposable
             if (currentProxyInfo.Equals(_lastProxyInfo)) return;
 
             var sb = new StringBuilder();
-            sb.AppendLine("Proxy Settings Changed:");
             if (_lastProxyInfo == null || _lastProxyInfo.ProxyEnable != currentProxyInfo.ProxyEnable)
                 sb.AppendLine($"Proxy Enabled: {currentProxyInfo.ProxyEnable}");
             if (_lastProxyInfo == null || _lastProxyInfo.ProxyServer != currentProxyInfo.ProxyServer)
                 sb.AppendLine($"Proxy Server: {currentProxyInfo.ProxyServer ?? "None"}");
             if (_lastProxyInfo == null || _lastProxyInfo.ProxyOverride != currentProxyInfo.ProxyOverride)
                 sb.AppendLine($"Proxy Override: {currentProxyInfo.ProxyOverride ?? "None"}");
-            sb.AppendLine("========================");
             var changes = sb.ToString().Trim();
 
             if (string.IsNullOrEmpty(changes)) return;
 
             Console.WriteLine(changes);
+            Console.WriteLine("========================");
             _notifyIcon.ShowBalloonTip(1000, "Proxy Settings Changed", changes, ToolTipIcon.Info);
             currentProxyInfo.SetEnvironmentVariables();
             _lastProxyInfo = currentProxyInfo;
