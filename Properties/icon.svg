@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+    <defs>
+        <linearGradient id="networkGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#4A90E2;stop-opacity:1"/>
+            <stop offset="100%" style="stop-color:#357ABD;stop-opacity:1"/>
+        </linearGradient>
+        <linearGradient id="syncGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#50C878;stop-opacity:1"/>
+            <stop offset="100%" style="stop-color:#3DA560;stop-opacity:1"/>
+        </linearGradient>
+    </defs>
+
+    <circle cx="16" cy="16" r="15" fill="url(#networkGradient)" stroke="#2C5F8B" stroke-width="0.5"/>
+
+    <circle cx="8" cy="12" r="2" fill="#FFFFFF" opacity="0.9"/>
+    <circle cx="24" cy="12" r="2" fill="#FFFFFF" opacity="0.9"/>
+    <circle cx="16" cy="6" r="2" fill="#FFFFFF" opacity="0.9"/>
+    <circle cx="16" cy="26" r="2" fill="#FFFFFF" opacity="0.9"/>
+
+    <line x1="8" y1="12" x2="16" y2="6" stroke="#FFFFFF" stroke-width="1.5" opacity="0.7"/>
+    <line x1="24" y1="12" x2="16" y2="6" stroke="#FFFFFF" stroke-width="1.5" opacity="0.7"/>
+    <line x1="8" y1="12" x2="16" y2="26" stroke="#FFFFFF" stroke-width="1.5" opacity="0.7"/>
+    <line x1="24" y1="12" x2="16" y2="26" stroke="#FFFFFF" stroke-width="1.5" opacity="0.7"/>
+
+    <g transform="translate(16,16)">
+        <circle r="4" fill="url(#syncGradient)" opacity="0.8"/>
+        <g stroke="#FFFFFF" stroke-width="1.2" fill="none">
+            <path d="M -1.5,-1 L 0,-2.5 L 1.5,-1" stroke-linecap="round"/>
+            <line x1="0" y1="-2.5" x2="0" y2="-0.5"/>
+
+            <path d="M -1.5,1 L 0,2.5 L 1.5,1" stroke-linecap="round"/>
+            <line x1="0" y1="2.5" x2="0" y2="0.5"/>
+        </g>
+    </g>
+
+    <circle cx="6" cy="20" r="1.5" fill="#FFD700" opacity="0.9"/>
+    <circle cx="26" cy="20" r="1.5" fill="#FFD700" opacity="0.9"/>
+
+    <rect x="4" y="4" width="2" height="2" fill="#FFFFFF" opacity="0.6" rx="0.3"/>
+    <rect x="6.5" y="4" width="2" height="2" fill="#FFFFFF" opacity="0.6" rx="0.3"/>
+    <rect x="4" y="6.5" width="2" height="2" fill="#FFFFFF" opacity="0.6" rx="0.3"/>
+    <rect x="6.5" y="6.5" width="2" height="2" fill="#FFFFFF" opacity="0.6" rx="0.3"/>
+</svg>

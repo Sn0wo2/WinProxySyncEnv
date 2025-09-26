@@ -27,12 +27,14 @@
     </PropertyGroup>
     <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
         <PlatformTarget>AnyCPU</PlatformTarget>
-        <DebugType>pdbonly</DebugType>
+        <DebugType>none</DebugType>
         <Optimize>true</Optimize>
         <OutputPath>bin\Release\</OutputPath>
         <DefineConstants>TRACE</DefineConstants>
         <ErrorReport>prompt</ErrorReport>
         <WarningLevel>4</WarningLevel>
+        <DebugSymbols>false</DebugSymbols>
+        <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
     </PropertyGroup>
     <ItemGroup>
         <Reference Include="System"/>
@@ -47,7 +49,19 @@
         <Compile Include="Properties\AssemblyInfo.cs"/>
         <Compile Include="proxy\ProxyInfo.cs"/>
         <Compile Include="service\ProxySyncService.cs"/>
+        <Compile Include="utils\DarkModeRenderer.cs"/>
+        <Compile Include="utils\MenuStyler.cs"/>
         <Compile Include="utils\ProxyUtils.cs"/>
     </ItemGroup>
+    <ItemGroup>
+        <EmbeddedResource Include="Properties\icon.ico"/>
+        <Content Include="Properties\icon.svg"/>
+    </ItemGroup>
+    <PropertyGroup>
+        <ApplicationIcon>Properties\icon.ico</ApplicationIcon>
+        <ApplicationManifest>app.manifest</ApplicationManifest>
+        <Prefer32Bit>false</Prefer32Bit>
+        <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    </PropertyGroup>
     <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets"/>
 </Project>
