@@ -27,7 +27,7 @@
 
 ```cmd
 .\WinProxySyncEnv install
-.\WinProxySyncEnv run
+.\WinProxySyncEnv
 ```
 
 ### **Uninstall**
