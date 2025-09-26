@@ -54,4 +54,5 @@ TestResult.xml
 nunit-*.xml
 
 # IDE
-./idea
+.idea/
+.vscode/
