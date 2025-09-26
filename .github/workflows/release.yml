@@ -1,42 +1,52 @@
-name: .NET Release
+name: .NET Windows Release
 
 on:
   push:
-    tags: [ 'v*' ]
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+      - 'v[0-9]+.[0-9]+.[0-9]+-*'
 
 jobs:
-  build:
+  build-and-release:
     runs-on: windows-latest
+    permissions:
+      contents: write
 
     steps:
     - uses: actions/checkout@v5
 
     - name: Get Version
-      id: get_version
-      run: echo ::set-output name=VERSION::${GITHUB_REF#refs/tags/v}
+      run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
       shell: bash
 
     - name: Update AssemblyInfo
       run: |
-        $version = "${{ steps.get_version.outputs.VERSION }}"
+        $version = "${{ env.VERSION }}"
+        $fileVersion = $version.Split('-')
         (Get-Content Properties\AssemblyInfo.cs) | ForEach-Object {
-          $_ -replace '\[assembly: AssemblyVersion\(".*"\)\]', "[assembly: AssemblyVersion(""$version"")]" `
-             -replace '\[assembly: AssemblyFileVersion\(".*"\)\]', "[assembly: AssemblyFileVersion(""$version"")]"
+          $_ -replace '\[assembly: AssemblyVersion\(".*"\)\]', "[assembly: AssemblyVersion(""$fileVersion"")]" `
+             -replace '\[assembly: AssemblyFileVersion\(".*"\)\]', "[assembly: AssemblyFileVersion(""$fileVersion"")]"
         } | Set-Content Properties\AssemblyInfo.cs
       shell: pwsh
 
     - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v1.3
 
-    - name: Build and publish
-      run: |
-        msbuild /p:Configuration=Release /p:DeployOnBuild=true /p:PublishProfile=Properties\PublishProfiles\FolderProfile.pubxml
+    - name: Build and publish x64
+      run: msbuild WinProxyEnvSync.csproj /p:Configuration=Release /p:Platform=x64 /p:DeployOnBuild=true /p:PublishProfile=Properties\PublishProfiles\FolderProfile.pubxml
         
+    - name: Build and publish x86
+      run: msbuild WinProxyEnvSync.csproj /p:Configuration=Release /p:Platform=x86 /p:DeployOnBuild=true /p:PublishProfile=Properties\PublishProfiles\FolderProfile.pubxml
+
     - name: Package Release
       run: |
-        Compress-Archive -Path "bin\Release\app.publish\*" -DestinationPath "WinProxyEnvSync-${{ steps.get_version.outputs.VERSION }}.zip"
+        7z a -w bin/x64/Release WinProxyEnvSync-windows-x64-${{ env.VERSION }}.zip *
+        7z a -w bin/x86/Release WinProxyEnvSync-windows-x86-${{ env.VERSION }}.zip *
+      shell: cmd
 
     - name: Release
       uses: softprops/action-gh-release@v2
       with:
-        files: "WinProxyEnvSync-${{ steps.get_version.outputs.VERSION }}.zip"
+        files: |
+          WinProxyEnvSync-windows-x64-${{ env.VERSION }}.zip
+          WinProxyEnvSync-windows-x86-${{ env.VERSION }}.zip
