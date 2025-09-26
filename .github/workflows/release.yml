@@ -1,0 +1,42 @@
+name: .NET Release
+
+on:
+  push:
+    tags: [ 'v*' ]
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v5
+
+    - name: Get Version
+      id: get_version
+      run: echo ::set-output name=VERSION::${GITHUB_REF#refs/tags/v}
+      shell: bash
+
+    - name: Update AssemblyInfo
+      run: |
+        $version = "${{ steps.get_version.outputs.VERSION }}"
+        (Get-Content Properties\AssemblyInfo.cs) | ForEach-Object {
+          $_ -replace '\[assembly: AssemblyVersion\(".*"\)\]', "[assembly: AssemblyVersion(""$version"")]" `
+             -replace '\[assembly: AssemblyFileVersion\(".*"\)\]', "[assembly: AssemblyFileVersion(""$version"")]"
+        } | Set-Content Properties\AssemblyInfo.cs
+      shell: pwsh
+
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v1.1
+
+    - name: Build and publish
+      run: |
+        msbuild /p:Configuration=Release /p:DeployOnBuild=true /p:PublishProfile=Properties\PublishProfiles\FolderProfile.pubxml
+        
+    - name: Package Release
+      run: |
+        Compress-Archive -Path "bin\Release\app.publish\*" -DestinationPath "WinProxyEnvSync-${{ steps.get_version.outputs.VERSION }}.zip"
+
+    - name: Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: "WinProxyEnvSync-${{ steps.get_version.outputs.VERSION }}.zip"
