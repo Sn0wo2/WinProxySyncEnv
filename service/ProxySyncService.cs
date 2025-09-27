@@ -21,7 +21,6 @@ public class ProxySyncService : IDisposable
   private readonly object _lock = new();
   private readonly NotifyIcon _notifyIcon;
   private readonly Timer _timer;
-  private ProxyInfo _initialProxyInfo;
   private ProxyInfo _lastProxyInfo;
 
   public ProxySyncService()
@@ -55,7 +54,7 @@ public class ProxySyncService : IDisposable
   {
     SystemEvents.UserPreferenceChanged -= OnUserPreferenceChanged;
 
-    _initialProxyInfo?.SetEnvironmentVariables();
+    new ProxyInfo(false, null, null).SetEnvironmentVariables();
 
     try
     {
@@ -186,11 +185,9 @@ public class ProxySyncService : IDisposable
 
     try
     {
-      _initialProxyInfo = ProxyUtils.GetCurrentInfo();
-      _lastProxyInfo = _initialProxyInfo;
+      _lastProxyInfo = ProxyUtils.GetCurrentInfo();
       _lastProxyInfo?.SetEnvironmentVariables();
       _timer.Start();
-
       Application.Run();
     }
     catch (Exception ex)
@@ -235,7 +232,7 @@ public class ProxySyncService : IDisposable
 
   private void ShowAbout()
   {
-    var version = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "1.0.0";
+    var version = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "0.0.0";
     var message = $"WinProxyEnvSync v{version}\nSync windows proxy settings to environment variables\n\nhttps://github.com/Sn0wo2/WinProxySyncEnv";
     MessageBox.Show(message, "About WinProxyEnvSync", MessageBoxButtons.OK, MessageBoxIcon.Information);
   }
