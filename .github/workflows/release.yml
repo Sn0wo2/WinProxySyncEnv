@@ -87,7 +87,20 @@ jobs:
           Compress-Archive -Path "$releasePath\*" -DestinationPath $zipPath
         }
 
+    - name: Generate Release Body
+      id: generate_body
+      shell: pwsh
+      run: |
+        $prev_tag = git tag --sort=-v:refname | Select-Object -Index 1
+        if (-not $prev_tag) {
+          $prev_tag = git rev-list --max-parents=0 HEAD
+        }
+        $current_tag = "${{ github.ref_name }}"
+        $body = "**Full Changelog**: https://github.com/${{ github.repository }}/compare/$prev_tag...$current_tag"
+        echo "body=$body" >> $env:GITHUB_OUTPUT
+
     - name: Release
       uses: softprops/action-gh-release@v2
       with:
         files: artifacts/*
+        body: ${{ steps.generate_body.outputs.body }}
