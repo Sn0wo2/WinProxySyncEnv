@@ -15,8 +15,7 @@ public static class ProxyUtils
     SMTO_NOTIMEOUTIFNOTHUNG = 0x8
   }
 
-  private static readonly string RegistryPath = @"Software\Microsoft\Windows\CurrentVersion\Internet Settings";
-
+  // https://learn.microsoft.com/en-us/windows/win32/winmsg/wm-settingchange
   [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
   public static extern IntPtr SendMessageTimeout(
     IntPtr hWnd,
@@ -29,23 +28,16 @@ public static class ProxyUtils
 
   public static ProxyInfo GetCurrentInfo()
   {
-    try
-    {
-      using var key = Registry.CurrentUser.OpenSubKey(RegistryPath, false);
+    using var key = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Internet Settings", false);
 
-      if (key?.GetValue("ProxyEnable") is not int proxyEnableValue)
-        return new ProxyInfo(false, null, null);
-
-      var proxyEnable = proxyEnableValue == 1;
-
-      var proxyServer = proxyEnable ? key.GetValue("ProxyServer") as string : null;
-      var proxyOverride = proxyEnable ? key.GetValue("ProxyOverride") as string : null;
-
-      return new ProxyInfo(proxyEnable, proxyServer, proxyOverride);
-    }
-    catch (Exception)
-    {
+    if (key?.GetValue("ProxyEnable") is not int proxyEnableValue)
       return new ProxyInfo(false, null, null);
-    }
+
+    var proxyEnable = proxyEnableValue == 1;
+
+    var proxyServer = proxyEnable ? key.GetValue("ProxyServer") as string : null;
+    var proxyOverride = proxyEnable ? key.GetValue("ProxyOverride") as string : null;
+
+    return new ProxyInfo(proxyEnable, proxyServer, proxyOverride);
   }
 }
