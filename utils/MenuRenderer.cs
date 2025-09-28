@@ -126,7 +126,7 @@ public class MenuRenderer : ToolStripProfessionalRenderer
     var g = e.Graphics;
     g.SmoothingMode = SmoothingMode.HighQuality;
 
-    g.FillPath(new SolidBrush(ColorTable.MenuItemSelected), GetRoundedRect(new Rectangle(2, 1, e.Item.Width - 4, e.Item.Height - 2), 5));
+    g.FillPath(new SolidBrush(ColorTable.MenuItemSelected), GetRoundedRect(new Rectangle(2, 1, e.Item.Width - 4, e.Item.Height - 2), 3));
   }
 
   private static GraphicsPath GetRoundedRect(Rectangle rect, int radius)
