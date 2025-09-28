@@ -26,7 +26,7 @@ public static class MenuStyler
         var useDarkMode = IsDarkModeEnabled() ? 1 : 0;
         NativeMethods.DwmSetWindowAttribute(handle, NativeMethods.DWMWA_USE_IMMERSIVE_DARK_MODE, ref useDarkMode, sizeof(int));
 
-        var cornerPreference = (int) NativeMethods.DwmWindowCornerPreference.DWMWCP_ROUND;
+        var cornerPreference = (int) NativeMethods.DwmWindowCornerPreference.DWMWCP_ROUNDSMALL;
         NativeMethods.DwmSetWindowAttribute(handle, NativeMethods.DWM_WINDOW_CORNER_PREFERENCE, ref cornerPreference, sizeof(int));
       }
       catch (Exception ex)
@@ -38,19 +38,9 @@ public static class MenuStyler
 
   public static bool IsDarkModeEnabled()
   {
-    try
-    {
-      using var key = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize");
-      if (key == null) return false;
-
-      var value = key.GetValue("AppsUseLightTheme");
-      return value is int intValue && intValue == 0;
-    }
-    catch (Exception ex)
-    {
-      Console.WriteLine($"Error checking dark mode: {ex.Message}");
-      return false;
-    }
+    using var key = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize");
+    if (key == null) return false;
+    return key.GetValue("AppsUseLightTheme") is int intValue && intValue == 0;
   }
 
   private static bool IsWindows11OrGreater()
