@@ -1,12 +1,12 @@
 using System;
 using System.Drawing;
 using System.Reflection;
-using System.Runtime;
 using System.Text;
 using System.Threading;
 using System.Timers;
 using System.Windows.Forms;
 using Microsoft.Win32;
+using WinProxyEnvSync.install;
 using WinProxyEnvSync.proxy;
 using WinProxyEnvSync.utils;
 using Timer = System.Timers.Timer;
@@ -25,8 +25,6 @@ public class ProxySyncService : IDisposable
 
   public ProxySyncService()
   {
-    GCSettings.LatencyMode = GCLatencyMode.Batch;
-
     _timer = new Timer(2000)
     {
       AutoReset = true
@@ -116,45 +114,23 @@ public class ProxySyncService : IDisposable
       var currentProxyInfo = ProxyUtils.GetCurrentInfo();
       if (currentProxyInfo == null) return;
 
-      try
-      {
-        var newText = $"WinProxyEnvSync\n{currentProxyInfo.GetProxy()}";
-        if (newText.Length > 63) newText = newText.Substring(0, 60) + "...";
+      var newText = $"WinProxyEnvSync\n{currentProxyInfo.GetProxy()}";
+      if (newText.Length > 63) newText = newText.Substring(0, 60) + "...";
 
-        if (_notifyIcon != null && _notifyIcon.Text != newText)
-          _notifyIcon.Text = newText;
-      }
-      catch (Exception ex)
-      {
-        Console.WriteLine($"Error updating tray icon text: {ex.Message}");
-      }
-
+      if (_notifyIcon != null && _notifyIcon.Text != newText)
+        _notifyIcon.Text = newText;
       if (currentProxyInfo.Equals(_lastProxyInfo)) return;
 
-      var changes = BuildChangeMessage(currentProxyInfo);
-      if (string.IsNullOrEmpty(changes)) return;
 
+      Console.WriteLine("=== Detected proxy settings change ===");
+
+      var changes = BuildChangeMessage(currentProxyInfo);
       Console.WriteLine(changes);
 
-      try
-      {
-        if (_notifyIcon != null)
-          _notifyIcon.ShowBalloonTip(1000, "Proxy Settings Changed", changes, ToolTipIcon.Info);
-      }
-      catch (Exception ex)
-      {
-        Console.WriteLine($"Error showing balloon tip: {ex.Message}");
-      }
+      ShowMessage(null, changes);
 
-      try
-      {
-        currentProxyInfo.SetEnvironmentVariables();
-        _lastProxyInfo = currentProxyInfo;
-      }
-      catch (Exception ex)
-      {
-        Console.WriteLine($"Error setting environment variables: {ex.Message}");
-      }
+      currentProxyInfo.SetEnvironmentVariables();
+      _lastProxyInfo = currentProxyInfo;
     }
     catch (Exception ex)
     {
@@ -170,6 +146,7 @@ public class ProxySyncService : IDisposable
   private string BuildChangeMessage(ProxyInfo currentProxyInfo)
   {
     var sb = new StringBuilder();
+    sb.AppendLine("Proxy settings changed:");
     if (_lastProxyInfo == null || _lastProxyInfo.ProxyEnable != currentProxyInfo.ProxyEnable)
       sb.AppendLine($"Proxy Enabled: {currentProxyInfo.ProxyEnable}");
     if (_lastProxyInfo == null || _lastProxyInfo.ProxyServer != currentProxyInfo.ProxyServer)
@@ -183,18 +160,8 @@ public class ProxySyncService : IDisposable
   {
     Console.WriteLine("WinProxyEnvSync Started...");
 
-    try
-    {
-      _lastProxyInfo = ProxyUtils.GetCurrentInfo();
-      _lastProxyInfo?.SetEnvironmentVariables();
-      _timer.Start();
-      Application.Run();
-    }
-    catch (Exception ex)
-    {
-      Console.WriteLine($"Error starting service: {ex.Message}");
-      throw;
-    }
+    _timer.Start();
+    Application.Run();
   }
 
   public void Stop()
@@ -206,28 +173,17 @@ public class ProxySyncService : IDisposable
 
   private Icon LoadAppIcon()
   {
-    try
+    using var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("WinProxyEnvSync.Properties.icon.ico");
+    if (stream != null)
     {
-      var assembly = Assembly.GetExecutingAssembly();
-      var resourceName = "WinProxyEnvSync.Properties.icon.ico";
-
-      using var stream = assembly.GetManifestResourceStream(resourceName);
-      if (stream != null)
-      {
-        return new Icon(stream);
-      }
+      return new Icon(stream);
     }
-    catch (Exception ex)
-    {
-      Console.Error.WriteLine(ex);
-    }
-
     return null;
   }
 
-  private void ShowMessage(string message)
+  private void ShowMessage(string title, string message)
   {
-    _notifyIcon.ShowBalloonTip(2000, "WinProxyEnvSync", message, ToolTipIcon.Info);
+    _notifyIcon.ShowBalloonTip(2000, title, message, ToolTipIcon.None);
   }
 
   private void ShowAbout()
@@ -258,34 +214,56 @@ public class ProxySyncService : IDisposable
     exitMenuItem.Click += (s, e) => Application.Exit();
     contextMenu.Items.Add(exitMenuItem);
 
+    if (Install.IsInstalled())
+    {
+      var uninstallMenuItem = new ToolStripMenuItem("Uninstall");
+      uninstallMenuItem.Click += (s, e) =>
+      {
+        var result = MessageBox.Show("Are you sure you want to uninstall WinProxyEnvSync? This will remove it from startup.", "Confirm Uninstall", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+        if (result == DialogResult.Yes)
+        {
+          Install.RemoveFromStartup();
+          ShowMessage(null, "WinProxyEnvSync has been uninstalled from startup.");
+          UpdateContextMenu();
+        }
+      };
+      contextMenu.Items.Add(uninstallMenuItem);
+    }
+    else
+    {
+      var installMenuItem = new ToolStripMenuItem("Install");
+      installMenuItem.Click += (s, e) =>
+      {
+        var result = MessageBox.Show("Do you want to install WinProxyEnvSync? This will add it to startup.", "Confirm Install", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+        if (result == DialogResult.Yes)
+        {
+          Install.AddToStartup();
+          ShowMessage(null, "WinProxyEnvSync has been installed to startup.");
+          UpdateContextMenu();
+        }
+      };
+      contextMenu.Items.Add(installMenuItem);
+    }
+
     return contextMenu;
+  }
+
+  private void UpdateContextMenu()
+  {
+    _notifyIcon.ContextMenuStrip = CreateContextMenu();
+    UpdateContextMenuRenderer();
+
+    var oldContextMenu = _notifyIcon.ContextMenuStrip;
+
+    if (oldContextMenu != null)
+    {
+      oldContextMenu.Dispose();
+    }
   }
 
   private void ShowCurrentStatus()
   {
-    try
-    {
-      var currentProxy = ProxyUtils.GetCurrentInfo();
-      if (currentProxy == null)
-      {
-        _notifyIcon?.ShowBalloonTip(2000, "Status", "Unable to get proxy status", ToolTipIcon.Warning);
-        return;
-      }
-
-      var statusText = $"Proxy Status:\nEnabled: {(currentProxy.ProxyEnable ? "Yes" : "No")}\nServer: {currentProxy.ProxyServer ?? "None"}\nOverride: {currentProxy.ProxyOverride ?? "None"}";
-      ShowMessage(statusText);
-    }
-    catch (Exception ex)
-    {
-      Console.WriteLine($"Error showing current status: {ex.Message}");
-      try
-      {
-        _notifyIcon?.ShowBalloonTip(2000, "Error", "Failed to get proxy status", ToolTipIcon.Error);
-      }
-      catch
-      {
-        // Ignore exceptions when showing error balloon tip
-      }
-    }
+    var currentProxy = ProxyUtils.GetCurrentInfo();
+    ShowMessage(null, $"Proxy Status:\nEnabled: {(currentProxy.ProxyEnable ? "Yes" : "No")}\nServer: {currentProxy.ProxyServer ?? "None"}\nOverride: {currentProxy.ProxyOverride ?? "None"}");
   }
 }

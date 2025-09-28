@@ -1,23 +1,22 @@
 using System;
 using System.Diagnostics;
 using System.Linq;
-using System.Reflection;
+using System.Runtime;
 using System.Threading;
 using System.Windows.Forms;
-using Microsoft.Win32;
+using WinProxyEnvSync.install;
 using WinProxyEnvSync.service;
 
 namespace WinProxyEnvSync;
 
 internal static class Program
 {
-  private const string AppName = "WinProxyEnvSync";
-  private const string StartupKeyPath = @"Software\Microsoft\Windows\CurrentVersion\Run";
-  private static readonly string AppPath = Assembly.GetExecutingAssembly().Location;
+  public const string AppName = "WinProxyEnvSync";
 
   [STAThread]
   public static void Main(string[] args)
   {
+    GCSettings.LatencyMode = GCLatencyMode.Batch;
     Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
     Application.ThreadException += ApplicationThreadException;
     AppDomain.CurrentDomain.UnhandledException += CurrentDomainUnhandledException;
@@ -35,10 +34,10 @@ internal static class Program
       {
         case "install":
         case "i":
-          AddToStartup();
+          Install.AddToStartup();
           break;
         case "uninstall":
-          RemoveFromStartup();
+          Install.RemoveFromStartup();
           break;
         default:
           RunApp();
@@ -71,56 +70,15 @@ internal static class Program
     }
   }
 
-  private static void AddToStartup()
-  {
-    try
-    {
-      using var key = Registry.CurrentUser.OpenSubKey(StartupKeyPath, true);
-      if (key == null)
-      {
-        Console.WriteLine("Error: Could not open startup registry key.");
-        return;
-      }
-
-      key.SetValue(AppName, $"\"{AppPath}\"");
-      Console.WriteLine("Application added to startup successfully.");
-    }
-    catch (Exception ex)
-    {
-      Console.WriteLine($"Error adding to startup: {ex.Message}");
-    }
-  }
-
-  private static void RemoveFromStartup()
-  {
-    try
-    {
-      using var key = Registry.CurrentUser.OpenSubKey(StartupKeyPath, true);
-      if (key?.GetValue(AppName) != null)
-      {
-        key.DeleteValue(AppName, false);
-        Console.WriteLine("Application removed from startup successfully.");
-      }
-      else
-      {
-        Console.WriteLine("Application not found in startup.");
-      }
-    }
-    catch (Exception ex)
-    {
-      Console.WriteLine($"Error removing from startup: {ex.Message}");
-    }
-  }
-
   private static void RunApp()
   {
     using var mutex = new Mutex(true, AppName, out var createdNew);
     if (!createdNew)
     {
+      Console.WriteLine("Another instance is already running. Exiting.");
       return;
     }
 
-    using var service = new ProxySyncService();
-    service.Start();
+    new ProxySyncService().Start();
   }
 }
