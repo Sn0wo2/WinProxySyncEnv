@@ -67,9 +67,11 @@
         <Reference Include="System.Xml"/>
     </ItemGroup>
     <ItemGroup>
-        <Compile Include="action\About.cs"/>
-        <Compile Include="action\Install.cs"/>
-        <Compile Include="action\Status.cs"/>
+        <Compile Include="action\impl\About.cs"/>
+        <Compile Include="action\impl\Install.cs"/>
+        <Compile Include="action\impl\Status.cs"/>
+        <Compile Include="action\impl\Uninstall.cs"/>
+        <Compile Include="action\ITrayAction.cs"/>
         <Compile Include="install\Install.cs"/>
         <Compile Include="notify\Tray.cs"/>
         <Compile Include="Program.cs"/>
