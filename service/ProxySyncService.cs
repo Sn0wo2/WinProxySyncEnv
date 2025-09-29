@@ -91,10 +91,4 @@ public class ProxySyncService : IDisposable
     _timer.Start();
     Application.Run();
   }
-
-  public void Stop()
-  {
-    _timer.Stop();
-    Application.Exit();
-  }
 }
