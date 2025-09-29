@@ -12,7 +12,7 @@ public class Tray
 {
   private static readonly MenuRenderer DarkModeRenderer = new(new DarkColorTable(), Color.White);
   private static readonly MenuRenderer LightModeRenderer = new(new LightColorTable(), Color.Black);
-  public readonly NotifyIcon _notifyIcon;
+  public readonly NotifyIcon NotifyIcon;
 
   public Tray(NotifyIcon notifyIcon)
   {
@@ -23,7 +23,7 @@ public class Tray
       Visible = true
     };
 
-    _notifyIcon = notifyIcon;
+    NotifyIcon = notifyIcon;
     SystemEvents.UserPreferenceChanged += OnUserPreferenceChanged;
 
     notifyIcon.ContextMenuStrip = CreateContextMenu();
@@ -88,36 +88,32 @@ public class Tray
 
   public void UpdateContextMenuRenderer()
   {
-    if (_notifyIcon?.ContextMenuStrip == null) return;
+    if (NotifyIcon?.ContextMenuStrip == null) return;
 
-    _notifyIcon.ContextMenuStrip.Renderer = MenuStyler.IsDarkModeEnabled()
+    NotifyIcon.ContextMenuStrip.Renderer = MenuStyler.IsDarkModeEnabled()
       ? DarkModeRenderer
       : LightModeRenderer;
   }
 
   public void UpdateContextMenu()
   {
-    _notifyIcon.ContextMenuStrip = CreateContextMenu();
+    var oldContextMenu = NotifyIcon.ContextMenuStrip;
+    NotifyIcon.ContextMenuStrip = CreateContextMenu();
     UpdateContextMenuRenderer();
 
-    var oldContextMenu = _notifyIcon.ContextMenuStrip;
-
-    if (oldContextMenu != null)
-    {
-      oldContextMenu.Dispose();
-    }
+    oldContextMenu?.Dispose();
   }
 
   public void ShowMessage(string title, string message)
   {
-    _notifyIcon.ShowBalloonTip(2000, title, message, ToolTipIcon.None);
+    NotifyIcon.ShowBalloonTip(2000, title, message, ToolTipIcon.None);
   }
 
   public void Dispose()
   {
     SystemEvents.UserPreferenceChanged -= OnUserPreferenceChanged;
-    _notifyIcon.Visible = false;
-    _notifyIcon.ContextMenuStrip?.Dispose();
-    _notifyIcon.Dispose();
+    NotifyIcon.Visible = false;
+    NotifyIcon.Dispose();
+    NotifyIcon.ContextMenuStrip?.Dispose();
   }
 }

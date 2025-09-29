@@ -47,7 +47,7 @@ public class ProxySyncService : IDisposable
       var newText = $"WinProxyEnvSync\n{currentProxyInfo.GetProxy()}";
       if (newText.Length > 63) newText = newText.Substring(0, 60) + "...";
 
-      _tray._notifyIcon.Text = newText;
+      _tray.NotifyIcon.Text = newText;
       if (currentProxyInfo.Equals(_lastProxyInfo)) return;
 
       Console.WriteLine("=== Detected proxy settings change ===");
