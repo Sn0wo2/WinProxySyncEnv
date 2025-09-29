@@ -2,7 +2,7 @@
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
 
-namespace WinProxyEnvSync.utils;
+namespace WinProxyEnvSync.render;
 
 public class DarkColorTable : ProfessionalColorTable
 {
